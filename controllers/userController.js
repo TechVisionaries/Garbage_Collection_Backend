@@ -7,64 +7,6 @@ import bcrypt from 'bcryptjs';
 // import { sendMail } from '../utils/mailer.js'
 // import { sendSMS } from '../utils/smsSender.js';
 
-// @desc    Check if user exists and send registeration mail
-// route    POST /api/users
-// @access  Public
-
-
-// const sendRegisterMail = asyncHandler(async (req, res) => {
-//     const {
-//         email, 
-//         image, 
-//         firstName, 
-//         lastName, 
-//         password,
-//         userType,
-//         gender 
-//     } = req.body;
-
-//     var userExists = await User.findOne({ email, userType });
-
-//     if(userExists){
-//         res.status(400);
-//         throw new Error('User Already Exists');
-//     }
-
-//     const user = ({
-//         email, 
-//         image, 
-//         firstName, 
-//         lastName, 
-//         password,
-//         userType,
-//         gender 
-//     });
-
-//     var token = jwt.sign({ user }, process.env.JWT_SECRET, { 
-//         expiresIn: '1d' 
-//     });
-
-//     token = `${token.split('.')[0]}/${token.split('.')[1]}/${token.split('.')[2]}`;
-
-//     if(token){
-//         const message = `<p><b>Hello ${user.firstName},</b><br><br> 
-//                             Welcome to CampusBodima! Start setting up your account by verifying your email address. Click this secure link:<br><br>
-//                             <a href="http://${process.env.DOMAIN}/register/${token}">Verify your email</a><br><br>
-//                             Thank you for choosing CampusBodima!<br><br>
-//                             Best wishes,<br>
-//                             The CampusBodima Team</p>`
-        
-//         sendMail(email,message,"Activate Your Account");
-//         res.status(201).json({ message: "Email Verification Sent!"});
-//     }
-//     else{
-//         res.status(400);
-//         throw new Error('Email not found');
-//     }
-
-    
-
-// });
 
 // @desc    Register a new user
 // route    POST /api/users/
@@ -131,6 +73,135 @@ const authUser = asyncHandler(async (req, res) => {
             res.status(500).send({ status: "Error with logging functionality" });
         });
  });
+
+
+
+// @desc    Logout user
+// route    POST /api/users/logout
+// @access  Public
+ const logoutUser = asyncHandler(async (req, res) => {
+
+    const { email } = req.body;
+
+    await User.findOneAndUpdate({ email }, { $set: { refreshToken: null } })
+        .then(() => {
+            res.cookie('jwt', '', {
+                httpOnly:true,
+                expires: new Date(0)
+           });
+           res.status(200).send({ status: "Logged out successfully" });
+        })
+        .catch((error) => {
+            console.log(error);
+            res.status(500).send({ status: "Error with logout functionality" });
+        });   
+ });
+
+
+// @desc    Get user profile
+// route    GET /api/users/profile/:id
+
+// @access  Private
+ const getUserProfile = asyncHandler(async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).send({ status: "User not found" });
+        }
+
+        res.status(200).send({ status: "User fetched", user });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ status: "Error with fetching one user data" });
+    }
+ });
+
+
+// @desc    Update user profile
+// route    PUT /api/users/profile
+// @access  Private
+ const updateUserProfile = asyncHandler(async (req, res) => {
+     const user = await User.findOne({ email: req.body.email});
+
+     if(user){
+         user.image = req.body.image;
+         user.firstName = req.body.firstName || user.firstName;
+         user.lastName = req.body.lastName || user.lastName;
+         user.phoneNo = req.body.phoneNo || user.phoneNo;
+         user.gender = req.body.gender || user.gender;
+         user.adderss = req.body.adderss || user.adderss;
+         user.city = req.body.city || user.city;
+         user.town = req.body.town || user.town
+         user.password = req.body.password || user.password;  
+         user.totalPayable =  req.body.totalPayable || user.totalPayable;
+         user.bankAccNo = req.body.bankAccNo || user.bankAccNo;
+         user.bankAccName = req.body.bankAccName || user.bankAccName;
+         user.bankName = req.body.bankName || user.bankName;
+         user.bankBranch = req.body.bankBranch || user.bankBranch;
+
+         const updatedUser = await user.save();
+
+         res.status(200).json({
+             _id: updatedUser._id,
+             email: updatedUser.email, 
+             image: updatedUser.image, 
+             firstName: updatedUser.firstName, 
+             lastName: updatedUser.lastName, 
+             accType: updatedUser.accType, 
+             userType: updatedUser.userType,
+             phoneNo: updatedUser.phoneNo,
+             gender: updatedUser.gender,
+             totalPayable: updatedUser.totalPayable,
+             bankAccNo: updatedUser.bankAccNo,
+             bankAccName: updatedUser.bankAccName,
+             bankName: updatedUser.bankName,
+             bankBranch: updatedUser.bankBranch,
+             createdAt: updatedUser.createdAt,
+             updatedAt: updatedUser.updatedAt
+         });
+     }else{
+         res.status(404);
+         throw new Error('User not found');
+     }
+ });
+
+
+// @desc    Get All User Details
+// route    get /api/users/all-users
+// @access  admin
+const getAllUsers = asyncHandler(async (req, res) => {
+    await User.find()
+        .then((users) => {
+            res.status(200).json(users);
+        })
+        .catch((error) => {
+            console.log(error);
+            res.status(500).send({ status: "Error with getting data" });
+        });
+});
+
+
+// @desc    Remove user profile
+// route    delete /api/users/:id
+// @access  admin
+const deleteUser = asyncHandler(async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).send({ status: "User not found" });
+        }
+
+        await User.findByIdAndDelete(userId)
+
+        res.status(200).send({ status: "User removed" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ status: "Error with deleting data" });
+    }
+});
 
 
 // @desc    Auth user & set token
@@ -223,167 +294,125 @@ const authUser = asyncHandler(async (req, res) => {
 // });
 
 
-// @desc    Logout user
-// route    POST /api/users/logout
+
+// @desc    Check if user exists and send registeration mail
+// route    POST /api/users
 // @access  Public
- const logoutUser = asyncHandler(async (req, res) => {
-
-    const { email } = req.body;
-
-    await User.findOneAndUpdate({ email }, { $set: { refreshToken: null } })
-        .then(() => {
-            res.cookie('jwt', '', {
-                httpOnly:true,
-                expires: new Date(0)
-           });
-           res.status(200).send({ status: "Logged out successfully" });
-        })
-        .catch((error) => {
-            console.log(error);
-            res.status(500).send({ status: "Error with logout functionality" });
-        });   
- });
 
 
-// @desc    Get user profile
-// route    GET /api/users/profile
-// @access  Private
-// const getUserProfile = asyncHandler(async (req, res) => {
-//     const user = {
-//         _id: req.user._id,
-//         email: req.user.email, 
-//         image: req.user.image, 
-//         firstName: req.user.firstName, 
-//         lastName: req.user.lastName, 
-//         accType: req.user.accType, 
-//         password: req.user.password, 
-//         userType: req.user.userType,
-//         phoneNo: req.user.phoneNo,
-//         gender: req.user.gender,
-//         totalPayable: req.user.totalPayable,
-//         bankAccNo: req.user.bankAccNo,
-//         bankAccName: req.user.bankAccName,
-//         bankName: req.user.bankName,
-//         bankBranch: req.user.bankBranch,
-//         createdAt: req.user.createdAt,
-//         updatedAt: req.user.updatedAt
-//     };  
-//     res.status(200).json(user);
-// });
+// const sendRegisterMail = asyncHandler(async (req, res) => {
+//     const {
+//         email, 
+//         image, 
+//         firstName, 
+//         lastName, 
+//         password,
+//         userType,
+//         gender 
+//     } = req.body;
 
+//     var userExists = await User.findOne({ email, userType });
 
-// @desc    Update user profile
-// route    PUT /api/users/profile
-// @access  Private
-// const updateUserProfile = asyncHandler(async (req, res) => {
-//     const user = await User.findOne({ email: req.body.email, userType: req.body.userType});
-
-//     if(user){
-//         user.image = req.body.image;
-//         user.firstName = req.body.firstName || user.firstName;
-//         user.lastName = req.body.lastName || user.lastName;
-//         user.phoneNo = req.body.phoneNo || user.phoneNo;
-//         user.gender = req.body.gender || user.gender;
-        
-//         if(user.userType == 'occupant'){
-//             user.totalPayable = req.body.totalPayable || user.totalPayable;
-//         }
-        
-//         if(user.userType == 'owner'){
-//             user.bankAccNo = req.body.bankAccNo || user.bankAccNo;
-//             user.bankAccName = req.body.bankAccName || user.bankAccName;
-//             user.bankName = req.body.bankName || user.bankName;
-//             user.bankBranch = req.body.bankBranch || user.bankBranch;
-//         }
-
-//         if(req.body.password && req.body.accType == 'normal'){
-//             user.password = req.body.password;
-//         }
-
-//         const updatedUser = await user.save();
-
-//         res.status(200).json({
-//             _id: updatedUser._id,
-//             email: updatedUser.email, 
-//             image: updatedUser.image, 
-//             firstName: updatedUser.firstName, 
-//             lastName: updatedUser.lastName, 
-//             accType: updatedUser.accType, 
-//             userType: updatedUser.userType,
-//             phoneNo: updatedUser.phoneNo,
-//             gender: updatedUser.gender,
-//             totalPayable: updatedUser.totalPayable,
-//             bankAccNo: updatedUser.bankAccNo,
-//             bankAccName: updatedUser.bankAccName,
-//             bankName: updatedUser.bankName,
-//             bankBranch: updatedUser.bankBranch,
-//             createdAt: updatedUser.createdAt,
-//             updatedAt: updatedUser.updatedAt
-//         });
-//     }else{
-//         res.status(404);
-//         throw new Error('User not found');
+//     if(userExists){
+//         res.status(400);
+//         throw new Error('User Already Exists');
 //     }
-// });
 
+//     const user = ({
+//         email, 
+//         image, 
+//         firstName, 
+//         lastName, 
+//         password,
+//         userType,
+//         gender 
+//     });
 
-// @desc    Generate OTP
-// route    POST /api/users/generateOTP
-// @access  Public
-// const generateOTP = asyncHandler(async (req, res) => {
-//     const { email, userType } = req.body;
+//     var token = jwt.sign({ user }, process.env.JWT_SECRET, { 
+//         expiresIn: '1d' 
+//     });
 
-//     const user = await User.findOne({ email, accType:"normal", userType });
-//     if(user){
-//         req.app.locals.OTP = await otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false});
+//     token = `${token.split('.')[0]}/${token.split('.')[1]}/${token.split('.')[2]}`;
+
+//     if(token){
+//         const message = `<p><b>Hello ${user.firstName},</b><br><br> 
+//                             Welcome to CampusBodima! Start setting up your account by verifying your email address. Click this secure link:<br><br>
+//                             <a href="http://${process.env.DOMAIN}/register/${token}">Verify your email</a><br><br>
+//                             Thank you for choosing CampusBodima!<br><br>
+//                             Best wishes,<br>
+//                             The CampusBodima Team</p>`
         
-//         const message = `<p>Hello ${user.firstName},<br> Your OTP is: <b>${req.app.locals.OTP}</b></p>`
-
-//         sendMail(email, message,"Your OTP");
-//         res.status(201).json({ message: "OTP Sent"});
+//         sendMail(email,message,"Activate Your Account");
+//         res.status(201).json({ message: "Email Verification Sent!"});
 //     }
 //     else{
 //         res.status(400);
 //         throw new Error('Email not found');
 //     }
 
+    
+
 // });
+
+
+
+// @desc    Generate OTP
+// route    POST /api/users/generateOTP
+// @access  Public
+//  const generateOTP = asyncHandler(async (req, res) => {
+//      const { email, userType } = req.body;
+
+//      const user = await User.findOne({ email, accType:"normal", userType });
+//      if(user){
+//          req.app.locals.OTP = await otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false});
+        
+//          const message = `<p>Hello ${user.firstName},<br> Your OTP is: <b>${req.app.locals.OTP}</b></p>`
+
+//          sendMail(email, message,"Your OTP");
+//          res.status(201).json({ message: "OTP Sent"});
+//      }
+//      else{
+//          res.status(400);
+//          throw new Error('Email not found');
+//      }
+
+//  });
 
 
 // @desc    Verify OTP
 // route    POST /api/users/verifyOTP
 // @access  Public
-// const verifyOTP = asyncHandler(async (req, res) => {
-//     const { otp } = req.body;
-//     if(parseInt(req.app.locals.OTP) === parseInt(otp)){
+//  const verifyOTP = asyncHandler(async (req, res) => {
+//      const { otp } = req.body;
+//      if(parseInt(req.app.locals.OTP) === parseInt(otp)){
         
-//         res.status(201).json({ code: req.app.locals.OTP })
-//     }
-//     else{
-//         req.app.locals.OTP = null;
-//         res.status(400);
-//         throw new Error("Invalid OTP");
-//     }
+//          res.status(201).json({ code: req.app.locals.OTP })
+//      }
+//      else{
+//          req.app.locals.OTP = null;
+//          res.status(400);
+//          throw new Error("Invalid OTP");
+//      }
 
-// });
+//  });
 
 
 // @desc    Generate SMS OTP
 // route    POST /api/users/sms/generateOTP
 // @access  public
-// const generateSMSOTP = asyncHandler(async (req, res) => {
-//     const { _id, phoneNo } = req.body;
+//  const generateSMSOTP = asyncHandler(async (req, res) => {
+//      const { _id, phoneNo } = req.body;
 
-//     const user = await User.findOne({ _id });
+//      const user = await User.findOne({ _id });
 
-//     req.app.locals.SMSOTP = await otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false});
+//      req.app.locals.SMSOTP = await otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false});
     
-//     const message = `Hello ${user.firstName}, Your OTP is: ${req.app.locals.SMSOTP}. Lets verify your phone number!`
-//     var number = {mobile: parseInt(phoneNo)};
-//     sendSMS(number, message);
-//     res.status(201).json({ message: "OTP Sent"});
+//      const message = `Hello ${user.firstName}, Your OTP is: ${req.app.locals.SMSOTP}. Lets verify your phone number!`
+//      var number = {mobile: parseInt(phoneNo)};
+//      sendSMS(number, message);
+//      res.status(201).json({ message: "OTP Sent"});
 
-// });
+//  });
 
 
 // @desc    Verify OTP
@@ -452,22 +481,12 @@ const authUser = asyncHandler(async (req, res) => {
 
 
 
-// export { 
-//     authUser,
-//     googleAuthUser,
-//     registerUser, 
-//     logoutUser,
-//     getUserProfile,
-//     updateUserProfile,
-//     generateOTP,
-//     verifyOTP,
-//     generateSMSOTP,
-//     verifySMSOTP,
-//     resetPassword 
-// };
-
  export { 
      authUser,
      registerUser, 
-     logoutUser
+     logoutUser,
+     getUserProfile,
+     updateUserProfile,
+     getAllUsers,
+     deleteUser
  };
