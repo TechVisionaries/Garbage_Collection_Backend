@@ -4,11 +4,13 @@ import bcrypt from 'bcryptjs';
 const userSchema = mongoose.Schema({
     email: {
         type: String, 
-        required: true
+        required: true,
+        unique : true
     },
     image: {
         type: String, 
-        required: false
+        required: false,
+        default: 'null'
     },
     firstName: {
         type: String, 
@@ -19,39 +21,57 @@ const userSchema = mongoose.Schema({
         required: false
     },
     phoneNo: {
-        type: String
+        type: String,
+        required: true
     },
     gender: {
         type: String
     },
-    accType: {
-        type: String, 
-        required: true,
-        default: 'normal'
-    },
     userType: {
         type: String, 
         required: true,
-        default: 'occupant'
+    },
+    adderss: {
+        type: String, 
+        required: true,
+    },
+    city: {
+        type: String, 
+        required: true,
+    },
+    town: {
+        type: String, 
+        required: true,
+    },
+    password: {
+        type: String,
+        required: true,
     },
     totalPayable: {
         type: String,
-    },
-    password: {
-        type: String
+        default: 0,
     },
     bankAccNo: {
         type: String,
+        default: 'null',
     },
     bankAccName: {
         type: String,
+        default: 'null',
     },
     bankName: {
         type: String,
+        default: 'null',
     },
     bankBranch: {
-        type: String
-    }
+        type: String,
+        default: 'null',
+    },
+    refreshToken : {
+        type : String,
+        default: 'null',
+    },
+
 }, {
     timestamps: true
 });
@@ -68,10 +88,6 @@ userSchema.pre('save', async function (next) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });
-
-userSchema.methods.matchPasswords = async function(enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
-}
 
 const User = mongoose.model('User', userSchema);
 

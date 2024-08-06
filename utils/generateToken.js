@@ -1,17 +1,18 @@
 import jwt from 'jsonwebtoken';
 
-const generateToken = (res, email) => {
-    const token = jwt.sign({ email }, process.env.JWT_SECRET, { 
-        expiresIn: '30d' 
-    })
-    
-    res.cookie('jwt', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== 'development',
-        sameSite: 'strict',
-        maxAge: 30*24*60*60*1000,
-    })
+// Token generator for logging
+const generateAccessToken = (payload) => {
+    return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30d' });
+};
 
-}
+// Token generator for refresh token
+const regenerateAccessToken = (payload) => {
+    return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET);
+};
 
-export default generateToken;
+const generateRefreshToken = (payload) => {
+    return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '30d' });
+};
+
+// Export the functions correctly
+export { generateAccessToken, regenerateAccessToken, generateRefreshToken };

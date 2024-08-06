@@ -6,6 +6,7 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import cookieParser from 'cookie-parser';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
 
@@ -31,6 +32,8 @@ app.use(bodyParser.json());
 // }else{
 //     app.get('/', (req, res) => res.send('Server is ready'));
 // }
+
+app.use('/api/users', userRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
