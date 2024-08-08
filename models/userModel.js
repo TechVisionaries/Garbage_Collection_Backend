@@ -24,54 +24,32 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    gender: {
-        type: String
-    },
     userType: {
         type: String, 
         required: true,
     },
-    adderss: {
-        type: String, 
-        required: true,
-    },
-    city: {
-        type: String, 
-        required: true,
-    },
-    town: {
-        type: String, 
-        required: true,
+    address: {
+        houseNo: {
+            type: String,
+            required: true,
+          },
+        city: {
+          type: String,
+          required: true,
+        },
+        street: {
+          type: String,
+          required: true,
+        },
     },
     password: {
         type: String,
         required: true,
     },
-    totalPayable: {
-        type: String,
-        default: 0,
-    },
-    bankAccNo: {
-        type: String,
-        default: 'null',
-    },
-    bankAccName: {
-        type: String,
-        default: 'null',
-    },
-    bankName: {
-        type: String,
-        default: 'null',
-    },
-    bankBranch: {
-        type: String,
-        default: 'null',
-    },
     refreshToken : {
         type : String,
-        default: 'null',
+        default : null
     },
-
 }, {
     timestamps: true
 });
