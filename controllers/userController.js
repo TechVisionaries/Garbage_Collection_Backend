@@ -13,18 +13,21 @@ import bcrypt from 'bcryptjs';
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
 
-    const { firstName, lastName, email, phoneNo, gender, userType, adderss, city, town, password, confirmPassword } = req.body;
+    const { firstName, lastName, email, phoneNo, userType, houseNo, city, street, password, confirmPassword } = req.body;
+
+    const address = {
+        houseNo,
+        city,
+        street,
+    };
 
     const newUser = new User({
         firstName,
         lastName,
         email,
         phoneNo,
-        gender,
         userType,
-        adderss,
-        city,
-        town,
+        address,
         password
     });
 
@@ -130,16 +133,14 @@ const authUser = asyncHandler(async (req, res) => {
          user.firstName = req.body.firstName || user.firstName;
          user.lastName = req.body.lastName || user.lastName;
          user.phoneNo = req.body.phoneNo || user.phoneNo;
-         user.gender = req.body.gender || user.gender;
-         user.adderss = req.body.adderss || user.adderss;
-         user.city = req.body.city || user.city;
-         user.town = req.body.town || user.town
-         user.password = req.body.password || user.password;  
-         user.totalPayable =  req.body.totalPayable || user.totalPayable;
-         user.bankAccNo = req.body.bankAccNo || user.bankAccNo;
-         user.bankAccName = req.body.bankAccName || user.bankAccName;
-         user.bankName = req.body.bankName || user.bankName;
-         user.bankBranch = req.body.bankBranch || user.bankBranch;
+
+         if (req.body.address) {
+            user.address.houseNo = req.body.address.houseNo || user.address.houseNo;
+            user.address.city = req.body.address.city || user.address.city;
+            user.address.street = req.body.address.street || user.address.street;
+        }
+        
+         user.password = req.body.password || user.password;
 
          const updatedUser = await user.save();
 
@@ -148,16 +149,10 @@ const authUser = asyncHandler(async (req, res) => {
              email: updatedUser.email, 
              image: updatedUser.image, 
              firstName: updatedUser.firstName, 
-             lastName: updatedUser.lastName, 
-             accType: updatedUser.accType, 
+             lastName: updatedUser.lastName,
              userType: updatedUser.userType,
              phoneNo: updatedUser.phoneNo,
-             gender: updatedUser.gender,
-             totalPayable: updatedUser.totalPayable,
-             bankAccNo: updatedUser.bankAccNo,
-             bankAccName: updatedUser.bankAccName,
-             bankName: updatedUser.bankName,
-             bankBranch: updatedUser.bankBranch,
+             address: updatedUser.address,
              createdAt: updatedUser.createdAt,
              updatedAt: updatedUser.updatedAt
          });

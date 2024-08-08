@@ -1,7 +1,6 @@
 import express from 'express';
-// import { authUser, googleAuthUser, sendRegisterMail, registerUser, logoutUser, getUserProfile, updateUserProfile, generateOTP, verifyOTP, generateSMSOTP, verifySMSOTP, resetPassword } from '../controllers/userController.js';
 import {authUser, registerUser, logoutUser, getUserProfile, updateUserProfile, getAllUsers, deleteUser} from '../controllers/userController.js';
-// import { protect } from '../middleware/authMiddleware.js'
+import {authMiddleware, isAdmin} from '../middleware/authMiddleware.js';
 // - **POST /api/users** - Register a user
 // - **POST /api/users/auth** - Authenticate a user and get token
 // - **POST /api/users/logout** - Logout user and clear cookie
@@ -13,11 +12,11 @@ const router = express.Router();
 
 router.post('/', registerUser);
 router.post('/auth', authUser);
-router.post('/logout', logoutUser);
-router.get('/profile/:id', getUserProfile);
-router.put('/profile',  updateUserProfile);
-router.get('/all-users', getAllUsers)
-router.delete('/:id', deleteUser);
+router.post('/logout', authMiddleware, logoutUser);
+router.get('/profile/:id', authMiddleware, getUserProfile);
+router.put('/profile',  authMiddleware, updateUserProfile);
+router.get('/all-users', authMiddleware, isAdmin, getAllUsers)
+router.delete('/:id', authMiddleware, isAdmin, deleteUser);
 // router.post('/googleAuth', googleAuthUser);
 // router.post('/', sendRegisterMail);
 // router.post('/generateOTP', generateOTP);
