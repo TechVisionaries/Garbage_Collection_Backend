@@ -7,6 +7,7 @@ import connectDB from './config/db.js';
 import cookieParser from 'cookie-parser';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import userRoutes from './routes/userRoutes.js';
+import rewardRoutes from './routes/rewardRoutes.js';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use(bodyParser.json());
 // }
 
 app.use('/api/users', userRoutes);
+app.use('/api/rewards', rewardRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

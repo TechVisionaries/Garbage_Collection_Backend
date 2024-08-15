@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
-const rewardSchema = mongoose.Schema(
+const rewardSchema = new mongoose.Schema(
   {
-    driver: {
+    driverId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Driver",
       required: true,
     },
     totalPoints: {
@@ -13,31 +13,52 @@ const rewardSchema = mongoose.Schema(
     },
     reviews: [
       {
-        resident: {
+        userId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
           required: true,
         },
-        points: {
+        rating: {
           type: Number,
           required: true,
+          min: 1,
+          max: 5,
         },
-        reviewText: {
+        comment: {
           type: String,
           required: false,
         },
-        createdAt: {
+        date: {
           type: Date,
           default: Date.now,
         },
       },
     ],
   },
-  {
-    timestamps : true
-  }
+  { timestamps: true }
 );
 
-const Reward = mongoose.model("Reward", rewardSchema);
+// Calculate total points based on the ratings
+rewardSchema.methods.calculateTotalPoints = function () {
+  let total = 0;
+  this.reviews.forEach((review) => {
+    total += review.rating;
+  });
+  this.totalPoints = total;
+  return this.totalPoints;
+};
 
-export default Reward;
+// Fetch top N drivers based on points
+rewardSchema.statics.getTopDrivers = async function (limit = 5) {
+  return this.find()
+    .sort({ totalPoints: -1 })
+    .limit(limit)
+    .populate("driverId");
+};
+
+// Reset points for all drivers
+rewardSchema.statics.resetPoints = async function () {
+  return this.updateMany({}, { totalPoints: 0 });
+};
+
+module.exports = mongoose.model("Reward", rewardSchema);
