@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const rewardSchema = new mongoose.Schema(
   {
     driverId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Driver",
+      ref: "User", 
       required: true,
     },
     totalPoints: {
@@ -61,4 +61,6 @@ rewardSchema.statics.resetPoints = async function () {
   return this.updateMany({}, { totalPoints: 0 });
 };
 
-module.exports = mongoose.model("Reward", rewardSchema);
+const Reward = mongoose.model("Reward", rewardSchema);
+
+export default Reward;
