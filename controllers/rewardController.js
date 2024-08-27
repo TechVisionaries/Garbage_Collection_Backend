@@ -82,6 +82,7 @@ const getAllReviews = asyncHandler(async (req, res) => {
   }
 });
 
+//update review
 const updateReview = asyncHandler(async (req, res) => {
   const { rating, comment } = req.body;
   const userId = req.user._id;
@@ -105,5 +106,22 @@ const updateReview = asyncHandler(async (req, res) => {
   }
 });
 
+// User can delete their review
+const deleteReview = asyncHandler(async (req, res) => {
+    const { reviewId } = req.body;
+    const userId = req.user._id;
 
-export { addReview, getAllReviews, updateReview };
+    const reward = await Reward.findOne({ 'reviews._id': reviewId, 'reviews.userId': userId });
+
+    if (reward) {
+        reward.reviews.id(reviewId).remove();
+        reward.calculateTotalPoints();
+        await reward.save();
+        res.status(200).json({ message: 'Review deleted successfully' });
+    } else {
+        res.status(404).json({ message: 'Review not found or you are not authorized to delete this review' });
+    }
+});
+
+
+export { addReview, getAllReviews, updateReview, deleteReview };
