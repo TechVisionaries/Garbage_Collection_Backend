@@ -150,6 +150,11 @@ const getAllDriverPoints = asyncHandler(async (req, res) => {
     res.status(200).json({ drivers: rewards });
 });
 
+//reset points
+const resetDriverPoints = asyncHandler(async (req, res) => {
+  await Reward.resetPoints();
+  res.status(200).json({ message: "All driver points have been reset" });
+});
 
 
 
@@ -160,4 +165,5 @@ export {
   deleteReview,
   getUserReviews,
   getAllDriverPoints,
+  resetDriverPoints,
 };
