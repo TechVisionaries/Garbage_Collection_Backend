@@ -30,6 +30,14 @@ const createAppointment = async (req, res) => {
   }
 };
 
-const reviewAppointments = async (req, res) => {};
+const getAllAppointments = async (req, res) => {
+  try {
+    const appointments = await Appointment.find().populate("userId");
+    res.json(appointments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
 
-export { createAppointment, reviewAppointments };
+export { createAppointment, getAllAppointments };
