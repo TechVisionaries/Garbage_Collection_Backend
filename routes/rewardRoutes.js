@@ -1,6 +1,6 @@
 import express from 'express';
 import {authMiddleware, isAdmin, isDriver, isResident} from '../middleware/authMiddleware.js';
-import { addReview, deleteReview, getAllDriverPoints, getAllReviews, getUserReviews, resetDriverPoints, updateReview,  } from '../controllers/rewardController.js';
+import { addReview, deleteReview, getAllDriverPoints, getAllReviews, getDriverPoints, getUserReviews, resetDriverPoints, updateReview,  } from '../controllers/rewardController.js';
 
 const router = express.Router();
 
@@ -14,5 +14,8 @@ router.get("/reviews/user", authMiddleware, isResident, getUserReviews);
 //Admin
 router.get("/drivers/points", authMiddleware, isAdmin, getAllDriverPoints);
 router.put("/drivers/resetpoints", authMiddleware, isAdmin, resetDriverPoints);
+
+//driver
+router.get("/driver/points", authMiddleware, isDriver, getDriverPoints);
 
 export default router;
