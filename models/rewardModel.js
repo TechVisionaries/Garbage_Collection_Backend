@@ -4,7 +4,7 @@ const rewardSchema = new mongoose.Schema(
   {
     driverId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", 
+      ref: "User",
       required: true,
     },
     totalPoints: {
@@ -41,9 +41,29 @@ const rewardSchema = new mongoose.Schema(
 // Calculate total points based on the ratings
 rewardSchema.methods.calculateTotalPoints = function () {
   let total = 0;
+
   this.reviews.forEach((review) => {
-    total += review.rating;
+    switch (review.rating) {
+      case 5:
+        total += 10;
+        break;
+      case 4:
+        total += 5;
+        break;
+      case 3:
+        total += 1;
+        break;
+      case 2:
+        total -= 5;
+        break;
+      case 1:
+        total -= 10;
+        break;
+      default:
+        break;
+    }
   });
+
   this.totalPoints = total;
   return this.totalPoints;
 };
