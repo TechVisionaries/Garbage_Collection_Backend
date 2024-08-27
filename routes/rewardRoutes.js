@@ -4,6 +4,6 @@ import { addReview } from '../controllers/rewardController.js';
 
 const router = express.Router();
 
-router.post('/review', authMiddleware, isAdmin, addReview);
+router.post('/review', authMiddleware, isResident, addReview);
 
 export default router;

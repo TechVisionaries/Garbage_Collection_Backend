@@ -35,7 +35,7 @@ app.use(bodyParser.json());
 // }
 
 app.use('/api/users', userRoutes);
-app.use('/api/rewards', rewardRoutes);
+app.use('/api/reward', rewardRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
