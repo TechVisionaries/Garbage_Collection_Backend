@@ -43,6 +43,30 @@ const getAllReviews = asyncHandler(async (req, res) => {
   }
 });
 
+const updateReview = asyncHandler(async (req, res) => {
+  const { reviewId, rating, comment } = req.body;
+  const userId = req.user._id;
 
+  const reward = await Reward.findOne({
+    "reviews._id": reviewId,
+    "reviews.userId": userId,
+  });
 
-export { addReview, getAllReviews };
+  if (reward) {
+    const review = reward.reviews.id(reviewId);
+    review.rating = rating || review.rating;
+    review.comment = comment || review.comment;
+    reward.calculateTotalPoints();
+    await reward.save();
+    res.status(200).json({ message: "Review updated successfully" });
+  } else {
+    res
+      .status(404)
+      .json({
+        message:
+          "Review not found or you are not authorized to update this review",
+      });
+  }
+});
+
+export { addReview, getAllReviews, updateReview };
