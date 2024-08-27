@@ -132,7 +132,16 @@ const deleteReview = asyncHandler(async (req, res) => {
   }
 });
 
+// User can view all the reviews they have done
+const getUserReviews = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+
+    const rewards = await Reward.find({ 'reviews.userId': userId }).populate('reviews.userId', 'email');
+
+    const userReviews = rewards.map(reward => reward.reviews.filter(review => review.userId._id.toString() === userId.toString()));
+
+    res.status(200).json({ reviews: userReviews.flat() });
+});
 
 
-
-export { addReview, getAllReviews, updateReview, deleteReview };
+export { addReview, getAllReviews, updateReview, deleteReview, getUserReviews };
