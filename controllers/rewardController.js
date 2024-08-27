@@ -143,5 +143,17 @@ const getUserReviews = asyncHandler(async (req, res) => {
     res.status(200).json({ reviews: userReviews.flat() });
 });
 
+// Admin can view all the points of all drivers and reset the points
+const getAllDriverPoints = asyncHandler(async (req, res) => {
+    const rewards = await Reward.find().populate('driverId', 'firstName lastName').sort({ totalPoints: -1 });
+
+    res.status(200).json({ drivers: rewards });
+});
+
+const resetDriverPoints = asyncHandler(async (req, res) => {
+    await Reward.resetPoints();
+    res.status(200).json({ message: 'All driver points have been reset' });
+});
+
 
 export { addReview, getAllReviews, updateReview, deleteReview, getUserReviews };
