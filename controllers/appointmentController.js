@@ -85,7 +85,7 @@ const cancelAppointment = async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    await appointment.remove();
+    await appointment.deleteOne();
     res.json({ message: "Appointment removed" });
   } catch (error) {
     console.error(error);
