@@ -156,7 +156,18 @@ const resetDriverPoints = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "All driver points have been reset" });
 });
 
+// Driver can view their total points
+const getDriverPoints = asyncHandler(async (req, res) => {
+    const driverId = req.user._id;
 
+    const reward = await Reward.findOne({ driverId });
+
+    if (reward) {
+        res.status(200).json({ points: reward.totalPoints });
+    } else {
+        res.status(404).json({ message: 'Points not found' });
+    }
+});
 
 export {
   addReview,
@@ -166,4 +177,5 @@ export {
   getUserReviews,
   getAllDriverPoints,
   resetDriverPoints,
+  getDriverPoints,
 };
