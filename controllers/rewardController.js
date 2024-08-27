@@ -150,10 +150,14 @@ const getAllDriverPoints = asyncHandler(async (req, res) => {
     res.status(200).json({ drivers: rewards });
 });
 
-const resetDriverPoints = asyncHandler(async (req, res) => {
-    await Reward.resetPoints();
-    res.status(200).json({ message: 'All driver points have been reset' });
-});
 
 
-export { addReview, getAllReviews, updateReview, deleteReview, getUserReviews };
+
+export {
+  addReview,
+  getAllReviews,
+  updateReview,
+  deleteReview,
+  getUserReviews,
+  getAllDriverPoints,
+};
