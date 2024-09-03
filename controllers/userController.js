@@ -14,7 +14,6 @@ import bcrypt from 'bcryptjs';
 const registerUser = asyncHandler(async (req, res) => {
 
     const { firstName, lastName, email, phoneNo, userType, houseNo, city, street, password, confirmPassword } = req.body;
-
     const address = {
         houseNo,
         city,
@@ -52,7 +51,6 @@ const registerUser = asyncHandler(async (req, res) => {
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
      const { email, password } = req.body;
-
       await User.findOne({ email })
         .then((loguser) => {
             if (!loguser) {
@@ -61,12 +59,13 @@ const authUser = asyncHandler(async (req, res) => {
             const comparedpassword = bcrypt.compare(password, loguser.password)
             if (comparedpassword) {
                 const userlogtype = loguser.userType;
+                const userId = loguser._id;
                 const loggertype = { useremail: email, userType: userlogtype };
                 const accessToken = generateAccessToken(loggertype);
                 const refreshToken = generateRefreshToken(loggertype);
                 loguser.refreshToken = refreshToken;
                 loguser.save();
-                res.status(200).send({ status: "User logged Successfully", accessToken, refreshToken });
+                res.status(200).send({ status: "User logged Successfully", accessToken, refreshToken, userId, userlogtype });
             } else {
                 res.status(412).send({ status: "User password is incorrect" });
             }
