@@ -106,7 +106,7 @@ const authUser = asyncHandler(async (req, res) => {
 // @access  Private
  const getUserProfile = asyncHandler(async (req, res) => {
     const userId = req.params.id;
-
+    const userId = req.params.id; 
     try {
         const user = await User.findById(userId);
         if (!user) {
