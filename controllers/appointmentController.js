@@ -12,14 +12,6 @@ const createAppointment = async (req, res) => {
       return res.status(400).json({ message: "Date is required" });
     }
 
-    // Check if the time is after 12 PM
-    // const appointmentTime = moment(date);
-    // if (appointmentTime.hour() >= 12) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "Appointments cannot be scheduled after 12 PM" });
-    // }
-
     // Retrieve user's home address if no address is provided
     let finalAddress = address;
 
