@@ -4,12 +4,11 @@ import User from "../models/userModel.js";
 
 const authMiddleware = asyncHandler(async (req, res, next) => {
   let token;
-
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
-    token = req.headers.authorization.split(" ")[2];
+    token = req.headers.authorization.split(" ")[1];
     try {
       if (token) {
         // Attempt to verify the token and log the decoded result
