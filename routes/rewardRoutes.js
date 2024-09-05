@@ -5,7 +5,7 @@ import { addReview, deleteReview, getAllDriverPoints, getAllReviews, getDriverPo
 const router = express.Router();
 
 //Resident
-router.post('/review', authMiddleware, isResident, addReview);
+router.post("/review", authMiddleware, /*isResident,*/ addReview);
 router.get("/reviews", authMiddleware, isAdmin, getAllReviews);
 router.put("/review/:reviewId", authMiddleware, isResident, updateReview);
 router.delete("/review/:reviewId", authMiddleware, isResident, deleteReview);
