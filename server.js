@@ -24,16 +24,16 @@ app.use(cors());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-// if(process.env.NODE_ENV === 'production'){
-//     const __dirname = path.resolve();
-//     app.use(express.static(path.join(__dirname, 'frontend/dist')));
+if(process.env.NODE_ENV === 'production'){
+    const __dirname = path.resolve();
+    app.use(express.static(path.join(__dirname, 'frontend/dist')));
 
-//     app.get('/*', (req, res) =>
-//         res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'))
-//     );
-// }else{
-//     app.get('/', (req, res) => res.send('Server is ready'));
-// }
+    app.get('/*', (req, res) =>
+        res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'))
+    );
+}else{
+    app.get('/', (req, res) => res.send('Server is ready'));
+}
 
 
 app.use('/api/users', userRoutes);
@@ -45,7 +45,7 @@ app.use("/api/appointments", appointmentRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is up and running on port: ${PORT}`);
   connectDB();
 });
