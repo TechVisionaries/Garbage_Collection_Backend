@@ -2,13 +2,15 @@ import Appointment from "../models/appointmentModel.js";
 import User from "../models/userModel.js";
 import moment from "moment";
 import checkAppointmentApproval from "../utils/checkAppointmentApproval.js";
+import mongoose from "mongoose";
 
 const createAppointment = async (req, res) => {
   try {
-    const { date, address, status } = req.body;
+    const { userId, date, address, status } = req.body;
 
     // Create new appointment instance
     const appointment = new Appointment({
+      userId,
       date,
       address,
       status: status || "pending",
@@ -22,30 +24,40 @@ const createAppointment = async (req, res) => {
   }
 };
 
-const getAllAppointments = async (req, res) => {
+// get all appointments of a user by userId
+const getMyAppointments = async (req, res) => {
   try {
-    const appointments = await Appointment.find().populate("userId");
-    res.json(appointments);
+    const { userId } = req.params;
+    console.log(userId);
+    const appointments = await Appointment.find({ userId });
+    res.status(200).json(appointments);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: "Error getting appointments", error });
   }
 };
 
 const cancelAppointment = async (req, res) => {
   try {
-    const appointment = await Appointment.findById(req.params.id);
+    const { id } = req.params;
+    const appointment = await Appointment.findById(id);
 
     if (!appointment) {
-      return res.status(404).json({ message: "Appointment not found" });
+      return res.status(404).json({ error: "Appointment not found" });
     }
 
-    await appointment.deleteOne();
-    res.json({ message: "Appointment removed" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    if (appointment.status !== "pending") {
+      return res
+        .status(400)
+        .json({ error: "Only pending appointments can be cancelled" });
+    }
+
+    appointment.status = "cancelled";
+    await appointment.save();
+
+    res.status(200).json({ message: "Appointment cancelled successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to cancel appointment" });
   }
 };
 
-export { createAppointment, getAllAppointments, cancelAppointment };
+export { createAppointment, getMyAppointments, cancelAppointment };
