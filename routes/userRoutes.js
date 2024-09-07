@@ -16,7 +16,7 @@ router.post('/logout', authMiddleware, logoutUser);
 router.get('/profile/:id', authMiddleware, getUserProfile);
 router.put('/profile',  authMiddleware, updateUserProfile);
 router.get('/all-users', authMiddleware, isAdmin, getAllUsers)
-router.delete('/:id', authMiddleware, isAdmin, deleteUser);
+router.delete('/:id', authMiddleware, deleteUser);
 // router.post('/googleAuth', googleAuthUser);
 // router.post('/', sendRegisterMail);
 // router.post('/generateOTP', generateOTP);
