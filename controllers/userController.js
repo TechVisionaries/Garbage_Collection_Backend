@@ -50,31 +50,49 @@ const registerUser = asyncHandler(async (req, res) => {
 // route    POST /api/users/auth
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
-     const { email, password } = req.body;
-      await User.findOne({ email })
-        .then((loguser) => {
-            if (!loguser) {
-                return res.status(404).send({ status: "User not found" });
-            }
-            const comparedpassword = bcrypt.compare(password, loguser.password)
-            if (comparedpassword) {
-                const userlogtype = loguser.userType;
-                const userId = loguser._id;
-                const loggertype = { useremail: email, userType: userlogtype };
-                const accessToken = generateAccessToken(loggertype);
-                const refreshToken = generateRefreshToken(loggertype);
-                loguser.refreshToken = refreshToken;
-                loguser.save();
-                res.status(200).send({ status: "User logged Successfully", accessToken, refreshToken, userId, userlogtype });
-            } else {
-                res.status(412).send({ status: "User password is incorrect" });
-            }
-        })
-        .catch((error) => {
-            console.log(error);
-            res.status(500).send({ status: "Error with logging functionality" });
-        });
- });
+    const { email, password } = req.body;
+
+    try {
+        const loguser = await User.findOne({ email });
+
+        if (!loguser) {
+            return res.status(404).send({ status: "User not found" });
+        }
+
+        // Await the result of bcrypt.compare
+        const comparedpassword = await bcrypt.compare(password, loguser.password);
+
+        if (comparedpassword) {
+            const userlogtype = loguser.userType;
+            const userId = loguser._id;
+            const loggertype = { useremail: email, userType: userlogtype };
+
+            // Generate tokens
+            const accessToken = generateAccessToken(loggertype);
+            const refreshToken = generateRefreshToken(loggertype);
+
+            // Store the refresh token in the database
+            loguser.refreshToken = refreshToken;
+            await loguser.save();
+
+            // Return success response with tokens
+            res.status(200).send({
+                status: "User logged in successfully",
+                accessToken,
+                refreshToken,
+                userId,
+                userlogtype
+            });
+        } else {
+            // Password did not match
+            res.status(412).send({ status: "User password is incorrect" });
+        }
+    } catch (error) {
+        // Catch any errors and return a server error response
+        res.status(500).send({ status: "Error with logging functionality", error: error.message });
+    }
+});
+
 
 
 
