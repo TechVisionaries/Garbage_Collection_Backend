@@ -1,26 +1,25 @@
 import mongoose from "mongoose";
 
-const appointmentSchema = mongoose.Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    date: { type: String, required: true },
-    address: {
-      houseNo: { type: String },
-      city: { type: String },
-      street: { type: String },
-    },
-    status: {
-      type: String,
-      enum: ["pending", "accepted", "rejected"],
-      default: "pending",
-    },
+const appointmentSchema = mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "User",
   },
-  { timestamp: true }
-);
+  date: {
+    type: String,
+    required: true,
+  },
+  address: {
+    houseNo: String,
+    street: String,
+    city: String,
+  },
+  status: {
+    type: String,
+    default: "pending",
+  },
+});
 
 const Appointment = mongoose.model("Appointment", appointmentSchema);
 

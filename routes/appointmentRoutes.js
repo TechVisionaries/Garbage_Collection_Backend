@@ -1,14 +1,14 @@
 import express from "express";
 import {
   createAppointment,
-  getAllAppointments,
+  getMyAppointments,
   cancelAppointment,
 } from "../controllers/appointmentController.js";
 
 const router = express.Router();
 
 router.post("/", createAppointment);
-router.get("/", getAllAppointments);
-router.delete("/:id", cancelAppointment);
+router.get("/:userId", getMyAppointments);
+router.put("/:id", cancelAppointment);
 
 export default router;
