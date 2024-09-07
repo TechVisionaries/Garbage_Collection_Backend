@@ -9,6 +9,6 @@ const router = express.Router();
 
 router.post("/", createAppointment);
 router.get("/:userId", getMyAppointments);
-router.delete("/:id", cancelAppointment);
+router.put("/:id", cancelAppointment);
 
 export default router;
