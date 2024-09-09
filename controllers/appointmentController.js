@@ -60,4 +60,26 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
-export { createAppointment, getMyAppointments, cancelAppointment };
+// Check if the user has already scheduled an appointment for the selected date if the get the appointment
+const checkDuplicateAppointment = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { date } = req.query;
+
+    const appointmentExists = await Appointment.exists({
+      userId: userId,
+      date: date,
+    });
+
+    res.status(200).json({ exists: appointmentExists });
+  } catch (error) {
+    res.status(500).json({ message: "Error checking appointment", error });
+  }
+};
+
+export {
+  createAppointment,
+  getMyAppointments,
+  cancelAppointment,
+  checkDuplicateAppointment,
+};
