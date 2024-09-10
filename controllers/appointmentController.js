@@ -6,17 +6,24 @@ import mongoose from "mongoose";
 
 const createAppointment = async (req, res) => {
   try {
-    const { userId, date, address, status } = req.body;
+    const { userId, date, status, location } = req.body;
 
-    // Create new appointment instance
+    if (!location || !location.latitude || !location.longitude) {
+      return res
+        .status(400)
+        .json({ message: "Location with latitude and longitude is required" });
+    }
+
     const appointment = new Appointment({
       userId,
       date,
-      address,
+      location: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
       status: status || "pending",
     });
 
-    // Save to database
     const savedAppointment = await appointment.save();
     res.status(201).json(savedAppointment);
   } catch (error) {
