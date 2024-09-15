@@ -24,7 +24,16 @@ app.use(cors());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => res.send('Server is ready'));
+if(process.env.NODE_ENV === 'production'){
+    const __dirname = path.resolve();
+    app.use(express.static(path.join(__dirname, 'frontend/dist')));
+
+    app.get('/*', (req, res) =>
+        res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'))
+    );
+}else{
+    app.get('/', (req, res) => res.send('Server is ready'));
+}
 
 
 app.use('/api/users', userRoutes);
@@ -36,8 +45,7 @@ app.use("/api/appointments", appointmentRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-const server = app.listen(0, () => {
-    const port = server.address().port; // Get the assigned random port
-    console.log(`Server is up and running on: http://localhost:${port}`);
-    connectDB();
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is up and running on port: ${PORT}`);
+  connectDB();
 });
