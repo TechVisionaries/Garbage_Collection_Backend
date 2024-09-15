@@ -25,7 +25,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 
-app.get('/', (req, res) => res.send('Server is ready!!'));
+app.get('/', (req, res) => res.send('Server is ready!!!'));
 
 
 app.use('/api/users', userRoutes);
