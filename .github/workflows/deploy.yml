@@ -22,7 +22,8 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -p 21098 pixelcor@162.0.217.178 << 'EOF'
             source /home/pixelcor/nodevenv/public_html/github/trashtrek.pixelcore.lk/22/bin/activate && cd /home/pixelcor/public_html/github/trashtrek.pixelcore.lk
+            git pull
             npm install
-            cloudlinux-selector stop-- json --interpreter nodejs --user pixelcor --app-root /home/pixelcor/public_html/github/trashtrek.pixelcore.lk
-            cloudlinux-selector start-- json --interpreter nodejs --user pixelcor --app-root /home/pixelcor/public_html/github/trashtrek.pixelcore.lk
+            cloudlinux-selector stop --json --interpreter nodejs --user pixelcor --app-root /home/pixelcor/public_html/github/trashtrek.pixelcore.lk
+            cloudlinux-selector start --json --interpreter nodejs --user pixelcor --app-root /home/pixelcor/public_html/github/trashtrek.pixelcore.lk
           EOF
