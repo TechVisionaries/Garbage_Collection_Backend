@@ -36,7 +36,8 @@ app.use("/api/appointments", appointmentRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(() => {
-  console.log(`Server is up and running on port: ${PORT}`);
-  connectDB();
+const server = app.listen(0, () => {
+    const port = server.address().port; // Get the assigned random port
+    console.log(`Server is up and running on: http://localhost:${port}`);
+    connectDB();
 });
