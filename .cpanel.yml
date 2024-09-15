@@ -1,0 +1,28 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # Change this to your main branch name if different
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-keys: ${{ secrets.SSH_PRIVATE_KEY }}  # Add your SSH private key to GitHub Secrets
+
+      - name: Deploy to server
+        run: |
+          ssh -o StrictHostKeyChecking=no -p 21098 pixelcor@162.0.217.178 << 'EOF'
+            # Commands to deploy your application
+            cd /path/to/your/app  # Change this to your application path
+            git pull origin main  # Change this if your main branch is different
+            # Add any other commands needed for deployment, e.g., npm install, docker-compose up, etc.
+          EOF
