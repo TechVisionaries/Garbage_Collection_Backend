@@ -8,6 +8,7 @@ const appointmentSchema = mongoose.Schema({
     longitude: { type: Number, required: true },
   },
   status: { type: String, default: "pending" },
+  driver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: false },
 });
 
 const Appointment = mongoose.model("Appointment", appointmentSchema);

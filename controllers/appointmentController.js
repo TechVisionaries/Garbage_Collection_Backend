@@ -84,9 +84,41 @@ const checkDuplicateAppointment = async (req, res) => {
   }
 };
 
+// get all appointments of a driver by driverId
+const getDriverAppointments = async (req, res) => {
+  try {
+    const { driverId } = req.params;
+    console.log(driverId);
+    const appointments = await Appointment.find({ driver:driverId, status: "accepted", date: new Date().toISOString().split('T')[0] });
+    res.status(200).json(appointments);
+  } catch (error) {
+    res.status(500).json({ message: "Error getting appointments", error });
+  }
+};
+
+const completeAppointment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const appointment = await Appointment.findById(id);
+
+    if (!appointment) {
+      return res.status(404).json({ error: "Appointment not found" });
+    }
+
+    appointment.status = "completed";
+    await appointment.save();
+
+    res.status(200).json({ message: "Appointment completed successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to cancel appointment" });
+  }
+};
+
 export {
   createAppointment,
   getMyAppointments,
   cancelAppointment,
   checkDuplicateAppointment,
+  getDriverAppointments,
+  completeAppointment
 };
