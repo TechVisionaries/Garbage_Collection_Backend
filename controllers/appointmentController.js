@@ -89,7 +89,11 @@ const getDriverAppointments = async (req, res) => {
   try {
     const { driverId } = req.params;
     console.log(driverId);
-    const appointments = await Appointment.find({ driver:driverId, status: "accepted", date: new Date().toISOString().split('T')[0] });
+    const appointments = await Appointment.find({
+      driver: driverId,
+      status: { $in: ["accepted", "completed"] },
+      date: new Date().toISOString().split('T')[0] // Assuming 'date' is stored in 'YYYY-MM-DD' format
+    });
     res.status(200).json(appointments);
   } catch (error) {
     res.status(500).json({ message: "Error getting appointments", error });
