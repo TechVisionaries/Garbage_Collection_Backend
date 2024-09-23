@@ -2,41 +2,18 @@ import asyncHandler from "express-async-handler";
 import Reward from "../models/rewardModel.js";
 import User from "../models/userModel.js";
 
-const addReview = asyncHandler(async (req, res) => {
-  const { rating, comment } = req.body;
-  const userId = req.user._id;
-
-  if (!rating) {
-    return res.status(400).json({ message: "Rating is required" });
-  }
-
-  let reward = await Reward.findOne({ "reviews.userId": userId });
-
-  if (!reward) {
-    reward = new Reward({
-      reviews: [{ userId, rating, comment }],
-    });
-  } else {
-    reward.reviews.push({ userId, rating, comment });
-  }
-
-  reward.calculateTotalPoints();
-  await reward.save();
-
-  res.status(201).json({ message: "Review added successfully", reward });
-});
-
-
-// Add a review for a relevant driver
 // const addReview = asyncHandler(async (req, res) => {
-//   const { /*driverId,*/ rating, comment } = req.body;
+//   const { rating, comment } = req.body;
 //   const userId = req.user._id;
 
-//   let reward = await Reward.findOne({ driverId });
+//   if (!rating) {
+//     return res.status(400).json({ message: "Rating is required" });
+//   }
+
+//   let reward = await Reward.findOne({ "reviews.userId": userId });
 
 //   if (!reward) {
 //     reward = new Reward({
-//       driverId,
 //       reviews: [{ userId, rating, comment }],
 //     });
 //   } else {
@@ -48,6 +25,29 @@ const addReview = asyncHandler(async (req, res) => {
 
 //   res.status(201).json({ message: "Review added successfully", reward });
 // });
+
+
+//Add a review for a relevant driver
+const addReview = asyncHandler(async (req, res) => {
+  const { driverId, rating, comment } = req.body;
+  const userId = req.user._id;
+
+  let reward = await Reward.findOne({ driverId });
+
+  if (!reward) {
+    reward = new Reward({
+      driverId,
+      reviews: [{ userId, rating, comment }],
+    });
+  } else {
+    reward.reviews.push({ userId, rating, comment });
+  }
+
+  reward.calculateTotalPoints();
+  await reward.save();
+
+  res.status(201).json({ message: "Review added successfully", reward });
+});
 
 // // Add a review for a relevant driver
 // const addReview = asyncHandler(async (req, res) => {
@@ -170,10 +170,39 @@ const getUserReviews = asyncHandler(async (req, res) => {
 
 // Admin can view all the points of all drivers and reset the points
 const getAllDriverPoints = asyncHandler(async (req, res) => {
-    const rewards = await Reward.find().populate('driverId', 'firstName lastName').sort({ totalPoints: -1 });
+  try {
+    // Fetch all rewards, populate driver details, and sort by total points in descending order
+    const rewards = await Reward.find()
+      .populate("driverId", "firstName lastName")
+      .sort({ totalPoints: -1 });
 
-    res.status(200).json({ drivers: rewards });
+    // Ensure that rewards are found
+    if (!rewards || rewards.length === 0) {
+      return res.status(404).json({ message: "No rewards found." });
+    }
+
+    // Map through rewards and assign rank, filtering out rewards with invalid driverId
+    const driversWithRank = rewards
+      .filter((reward) => reward.driverId && reward.driverId._id) // Ensure driverId and its _id are not null/undefined
+      .map((reward, index) => ({
+        rank: index + 1, // Rank is 1-based (not 0-based)
+        driverId: reward.driverId._id,
+        firstName: reward.driverId.firstName,
+        lastName: reward.driverId.lastName,
+        totalPoints: reward.totalPoints,
+        reviews: reward.reviews, // Include reviews if needed
+      }));
+
+    // Return the drivers with ranks in the response
+    res.status(200).json({ drivers: driversWithRank });
+  } catch (error) {
+    // Handle any unexpected errors
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 });
+
+
 
 //reset points
 const resetDriverPoints = asyncHandler(async (req, res) => {
@@ -183,16 +212,21 @@ const resetDriverPoints = asyncHandler(async (req, res) => {
 
 // Driver can view their total points
 const getDriverPoints = asyncHandler(async (req, res) => {
-    const driverId = req.user._id;
+  const driverId = req.user._id;
 
-    const reward = await Reward.findOne({ driverId });
+  const reward = await Reward.findOne({ driverId });
 
-    if (reward) {
-        res.status(200).json({ points: reward.totalPoints });
-    } else {
-        res.status(404).json({ message: 'Points not found' });
-    }
+  if (reward) {
+    const rank = await reward.calculateRank(); // Calculate driver rank
+    res.status(200).json({
+      points: reward.totalPoints,
+      rank: rank,
+    });
+  } else {
+    res.status(404).json({ message: "Points not found" });
+  }
 });
+
 
 export {
   addReview,

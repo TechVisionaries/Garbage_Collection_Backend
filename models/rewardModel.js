@@ -5,7 +5,7 @@ const rewardSchema = new mongoose.Schema(
     driverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      //required: true,
+      required: true,
     },
     totalPoints: {
       type: Number,
@@ -75,6 +75,32 @@ rewardSchema.statics.getTopDrivers = async function (limit = 5) {
     .limit(limit)
     .populate("driverId");
 };
+
+// Calculate and assign rank to drivers based on total points
+rewardSchema.methods.calculateRank = async function () {
+  const allDrivers = await mongoose
+    .model("Reward")
+    .find()
+    .sort({ totalPoints: -1 });
+
+  const driverRanks = allDrivers
+    .map((driver, index) => {
+      if (driver.driverId) {
+        return {
+          driverId: driver.driverId.toString(),
+          rank: index + 1,
+        };
+      }
+      return null;
+    })
+    .filter((rank) => rank !== null); // Filter out any null values
+
+  const driverRank = driverRanks.find(
+    (d) => d.driverId === this.driverId.toString()
+  );
+  return driverRank ? driverRank.rank : null;
+};
+
 
 // Reset points for all drivers
 rewardSchema.statics.resetPoints = async function () {
