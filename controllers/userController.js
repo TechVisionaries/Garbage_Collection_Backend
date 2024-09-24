@@ -489,13 +489,18 @@ const getUserByStreet = asyncHandler(async (req, res) => {
   const street = req.params.street;
 
   try {
-    const users = await User.find({ "address.street": street });
+    const users = await User.find({
+      "address.street": street,
+      userType: "Driver",
+    });
 
     if (users.length === 0) {
-      return res.status(404).send({ status: "No users found on this street" });
+      return res
+        .status(404)
+        .send({ status: "No drivers found on this street" });
     }
 
-    res.status(200).send({ status: "Users fetched", users });
+    res.status(200).send({ status: "Drivers fetched", users });
   } catch (error) {
     console.error(error);
     res
