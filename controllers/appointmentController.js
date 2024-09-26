@@ -97,7 +97,8 @@ const getDriverAppointments = async (req, res) => {
     const { driverId } = req.params;
     const appointments = await Appointment.find({
       driver: driverId,
-      status: "pending",
+      status: { $in: ["accepted", "completed"] },
+      date: new Date().toLocaleDateString('en-CA') // Assuming 'date' is stored in 'YYYY-MM-DD' format
     });
     res.status(200).json(appointments);
   } catch (error) {
