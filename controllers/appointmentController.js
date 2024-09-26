@@ -6,7 +6,8 @@ import mongoose from "mongoose";
 
 const createAppointment = async (req, res) => {
   try {
-    const { userId, date, status, location } = req.body;
+    const { userId, date, status, location, driver } = req.body;
+    console.log(req.body); // Log the incoming request body
 
     if (!location || !location.latitude || !location.longitude) {
       return res
@@ -22,6 +23,7 @@ const createAppointment = async (req, res) => {
         longitude: location.longitude,
       },
       status: status || "pending",
+      driver,
     });
 
     const savedAppointment = await appointment.save();
@@ -92,7 +94,7 @@ const getDriverAppointments = async (req, res) => {
     const appointments = await Appointment.find({
       driver: driverId,
       status: { $in: ["accepted", "completed"] },
-      date: new Date().toISOString().split('T')[0] // Assuming 'date' is stored in 'YYYY-MM-DD' format
+      date: new Date().toISOString().split("T")[0], // Assuming 'date' is stored in 'YYYY-MM-DD' format
     });
     res.status(200).json(appointments);
   } catch (error) {
@@ -124,5 +126,5 @@ export {
   cancelAppointment,
   checkDuplicateAppointment,
   getDriverAppointments,
-  completeAppointment
+  completeAppointment,
 };
