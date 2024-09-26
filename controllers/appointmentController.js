@@ -14,7 +14,8 @@ const createAppointment = async (req, res) => {
         .status(400)
         .json({ message: "Location with latitude and longitude is required" });
     }
-
+    
+    
     const appointment = new Appointment({
       userId,
       date,
@@ -25,6 +26,9 @@ const createAppointment = async (req, res) => {
       status: status || "pending",
       driver,
     });
+    
+    // id the driver has more than 3 appointments update all to accepted including the new one
+    await checkAppointmentApproval(appointment);
 
     const savedAppointment = await appointment.save();
     res.status(201).json(savedAppointment);
@@ -36,6 +40,7 @@ const createAppointment = async (req, res) => {
 // get all appointments of a user by userId
 const getMyAppointments = async (req, res) => {
   try {
+    
     const { userId } = req.params;
     console.log(userId);
     const appointments = await Appointment.find({ userId });
@@ -90,11 +95,9 @@ const checkDuplicateAppointment = async (req, res) => {
 const getDriverAppointments = async (req, res) => {
   try {
     const { driverId } = req.params;
-    console.log(driverId);
     const appointments = await Appointment.find({
       driver: driverId,
-      status: { $in: ["accepted", "completed"] },
-      date: new Date().toISOString().split("T")[0], // Assuming 'date' is stored in 'YYYY-MM-DD' format
+      status: "pending",
     });
     res.status(200).json(appointments);
   } catch (error) {
