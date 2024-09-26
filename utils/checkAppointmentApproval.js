@@ -1,12 +1,12 @@
 import Appointment from "../models/appointmentModel.js";
 
 const checkAppointmentApproval = async (appointment) => {
-  const { date, address } = appointment;
-  console.log(date);
+  const { driver,date } = appointment;
 
   const appointmentCount = await Appointment.countDocuments({
+    driver,
     date,
-    "address.street": address.street,
+    status: "pending",
   });
 
   console.log(appointmentCount);
@@ -15,12 +15,14 @@ const checkAppointmentApproval = async (appointment) => {
     // Update all matching appointments to 'accepted'
     await Appointment.updateMany(
       {
-        date,
-        "address.street": address.street,
+        driver,
         status: "pending",
+        date,
       },
       { $set: { status: "accepted" } }
     );
+       // Update the status of the current appointment object in memory
+       appointment.status = "accepted";
   }
 };
 
