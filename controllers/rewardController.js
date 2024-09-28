@@ -210,22 +210,37 @@ const resetDriverPoints = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "All driver points have been reset" });
 });
 
-// Driver can view their total points
+// Driver can view their all reviews
 const getDriverPoints = asyncHandler(async (req, res) => {
   const driverId = req.user._id;
 
-  const reward = await Reward.findOne({ driverId });
+  const reward = await Reward.findOne({ driverId }).populate({
+    path: "reviews.userId",
+    select: "firstName lastName", 
+  });
 
   if (reward) {
-    const rank = await reward.calculateRank(); // Calculate driver rank
+    const rank = await reward.calculateRank();
+
+    const formattedReviews = reward.reviews.map((review) => ({
+      rating: review.rating,
+      comment: review.comment,
+      residentName: review.userId
+        ? `${review.userId.firstName} ${review.userId.lastName || ""}`.trim() // Concatenate firstName and lastName
+        : "Anonymous", 
+      date: review.date,
+    }));
+
     res.status(200).json({
       points: reward.totalPoints,
       rank: rank,
+      reviews: formattedReviews,
     });
   } else {
-    res.status(404).json({ message: "Points not found" });
+    res.status(404).json({ message: "No rewards found for this driver" });
   }
 });
+
 
 
 export {
