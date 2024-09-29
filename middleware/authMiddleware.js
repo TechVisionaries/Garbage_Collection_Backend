@@ -4,64 +4,90 @@ import User from "../models/userModel.js";
 
 const authMiddleware = asyncHandler(async (req, res, next) => {
   let token;
+
+  // Check if authorization header exists and starts with "Bearer"
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
-    token = req.headers.authorization.split(" ")[1];
     try {
+      // Extract the token
+      token = req.headers.authorization.split(" ")[1];
+
       if (token) {
-        // Attempt to verify the token and log the decoded result
-        try {
-          const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-          const email = decoded.useremail;
-          const user = await User.findOne({ email });
-          req.user = user;
-          next();
-        } catch (verificationError) {
-          res.status(400).send({ status: verificationError });
+        // Verify token
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+        if (!decoded) {
+          return res.status(401).json({ status: "Token verification failed" });
         }
+
+        // Find user by email decoded from the token
+        const email = decoded.useremail;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+          return res.status(404).json({ status: "User not found" });
+        }
+
+        // Attach user to request object
+        req.user = user;
+        next();
       } else {
-        res.status(400).send({ status: "Token is empty" });
+        res.status(400).json({ status: "Token is empty" });
       }
     } catch (error) {
-      res.status(400).send({ status: error });
+      // Token verification error
+      return res
+        .status(401)
+        .json({ status: "Invalid token", error: error.message });
     }
   } else {
-    res.status(400).send({ status: "There is no token attached to header" });
+    res
+      .status(400)
+      .json({
+        status: "Authorization token missing or not properly formatted",
+      });
   }
 });
 
-// check wether the user is a admin
+// Check if the user is an admin
 const isAdmin = asyncHandler(async (req, res, next) => {
-  const { email } = req.user;
-  const adminUser = await User.findOne({ email });
-  if (adminUser.userType !== "Admin") {
-    res.status(405).send({ status: "you are not an admin" });
-  } else {
-    next();
+  if (!req.user) {
+    return res.status(401).json({ status: "Not authorized, no user found" });
   }
+
+  if (req.user.userType !== "Admin") {
+    return res.status(403).json({ status: "You are not an admin" });
+  }
+
+  next();
 });
 
+// Check if the user is a driver
 const isDriver = asyncHandler(async (req, res, next) => {
-  const { email } = req.user;
-  const adminUser = await User.findOne({ email });
-  if (adminUser.userType !== "Driver") {
-    res.status(405).send({ status: "you are not a Driver" });
-  } else {
-    next();
+  if (!req.user) {
+    return res.status(401).json({ status: "Not authorized, no user found" });
   }
+
+  if (req.user.userType !== "Driver") {
+    return res.status(403).json({ status: "You are not a driver" });
+  }
+
+  next();
 });
 
+// Check if the user is a resident
 const isResident = asyncHandler(async (req, res, next) => {
-  const { email } = req.user;
-  const adminUser = await User.findOne({ email });
-  if (adminUser.userType !== "Resident") {
-    res.status(405).send({ status: "you are not a Resident" });
-  } else {
-    next();
+  if (!req.user) {
+    return res.status(401).json({ status: "Not authorized, no user found" });
   }
+
+  if (req.user.userType !== "Resident") {
+    return res.status(403).json({ status: "You are not a resident" });
+  }
+
+  next();
 });
 
-//expotation
 export { authMiddleware, isAdmin, isDriver, isResident };
