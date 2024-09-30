@@ -214,32 +214,43 @@ const resetDriverPoints = asyncHandler(async (req, res) => {
 const getDriverPoints = asyncHandler(async (req, res) => {
   const driverId = req.user._id;
 
-  const reward = await Reward.findOne({ driverId }).populate({
-    path: "reviews.userId",
-    select: "firstName lastName", 
-  });
-
-  if (reward) {
-    const rank = await reward.calculateRank();
-
-    const formattedReviews = reward.reviews.map((review) => ({
-      rating: review.rating,
-      comment: review.comment,
-      residentName: review.userId
-        ? `${review.userId.firstName} ${review.userId.lastName || ""}`.trim() // Concatenate firstName and lastName
-        : "Anonymous", 
-      date: review.date,
-    }));
-
-    res.status(200).json({
-      points: reward.totalPoints,
-      rank: rank,
-      reviews: formattedReviews,
+  try {
+    // Fetch the reward for the driver
+    const reward = await Reward.findOne({ driverId }).populate({
+      path: "reviews.userId",
+      select: "firstName lastName",
     });
-  } else {
-    res.status(404).json({ message: "No rewards found for this driver" });
+
+    // Check if the reward exists
+    if (reward) {
+      const rank = await reward.calculateRank();
+
+      // Format reviews
+      const formattedReviews = reward.reviews.map((review) => ({
+        rating: review.rating,
+        comment: review.comment,
+        residentName: review.userId
+          ? `${review.userId.firstName} ${review.userId.lastName || ""}`.trim()
+          : "Anonymous",
+        date: review.date,
+      }));
+
+      // Return response with points and rank
+      return res.status(200).json({
+        points: reward.totalPoints,
+        rank: rank,
+        reviews: formattedReviews.length > 0 ? formattedReviews : [], // Handle empty reviews
+      });
+    } else {
+      return res.status(404).json({ message: "No rewards found for this driver" });
+    }
+  } catch (error) {
+    // Handle any errors that occur during the process
+    console.error("Error fetching driver points:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 
 
