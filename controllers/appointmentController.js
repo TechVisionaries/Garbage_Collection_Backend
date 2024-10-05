@@ -122,7 +122,20 @@ const completeAppointment = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Failed to cancel appointment" });
   }
+}
+
+// get all appointments
+const getAllAppointments = async (req, res) => {
+  try {
+    const appointments = await Appointment.find();
+    res.status(200).json(appointments);
+  } catch (error) {
+    res.status(500).json({ message: "Error getting appointments", error });
+  }
 };
+
+
+
 
 export {
   createAppointment,
@@ -131,4 +144,5 @@ export {
   checkDuplicateAppointment,
   getDriverAppointments,
   completeAppointment,
+  getAllAppointments,
 };
