@@ -173,8 +173,11 @@ const getAllDriverPoints = asyncHandler(async (req, res) => {
   try {
     // Fetch all rewards, populate driver details, and sort by total points in descending order
     const rewards = await Reward.find()
-      .populate("driverId", "firstName lastName")
+      .populate("driverId", "firstName lastName") // Ensure driverId references a valid model with these fields
       .sort({ totalPoints: -1 });
+
+    // Log to check the populated results
+    console.log("Populated rewards:", rewards);
 
     // Ensure that rewards are found
     if (!rewards || rewards.length === 0) {
@@ -187,20 +190,19 @@ const getAllDriverPoints = asyncHandler(async (req, res) => {
       .map((reward, index) => ({
         rank: index + 1, // Rank is 1-based (not 0-based)
         driverId: reward.driverId._id,
-        firstName: reward.driverId.firstName,
+        firstName: reward.driverId.firstName, // Log driver names
         lastName: reward.driverId.lastName,
         totalPoints: reward.totalPoints,
-        reviews: reward.reviews, // Include reviews if needed
+        //reviews: reward.reviews,
       }));
 
-    // Return the drivers with ranks in the response
     res.status(200).json({ drivers: driversWithRank });
   } catch (error) {
-    // Handle any unexpected errors
     console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
+
 
 
 
@@ -250,6 +252,9 @@ const getDriverPoints = asyncHandler(async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+
 
 
 

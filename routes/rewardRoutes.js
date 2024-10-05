@@ -15,6 +15,7 @@ router.get("/reviews/user", authMiddleware, isResident, getUserReviews);
 router.get("/drivers/points", authMiddleware, isAdmin, getAllDriverPoints);
 router.put("/drivers/resetpoints", authMiddleware, isAdmin, resetDriverPoints);
 
+
 //driver
 router.get("/driver/points", authMiddleware, isDriver, getDriverPoints);
 
