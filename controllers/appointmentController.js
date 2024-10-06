@@ -95,10 +95,11 @@ const checkDuplicateAppointment = async (req, res) => {
 const getDriverAppointments = async (req, res) => {
   try {
     const { driverId } = req.params;
+    const { date } = req.query;
     const appointments = await Appointment.find({
       driver: driverId,
       status: { $in: ["accepted", "completed"] },
-      date: new Date().toLocaleDateString('en-CA') // Assuming 'date' is stored in 'YYYY-MM-DD' format
+      date: date // Assuming 'date' is stored in 'YYYY-MM-DD' format
     });
     res.status(200).json(appointments);
   } catch (error) {
