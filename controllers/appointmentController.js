@@ -6,16 +6,40 @@ import mongoose from "mongoose";
 
 const createAppointment = async (req, res) => {
   try {
-    const { userId, date, status, location, driver } = req.body;
+    const { userId, date, status, location, driver,garbageTypes } = req.body;
     console.log(req.body); // Log the incoming request body
 
+    
+    // check if the user exists
+    if (!userId) {
+      return res.status(400).json({ message: "User is required" });
+    }
+    
+    // check if the date exists
+    if (!date) {
+      return res.status(400).json({ message: "Date is required" });
+    }
+    
+    // check if the location there
     if (!location || !location.latitude || !location.longitude) {
       return res
         .status(400)
         .json({ message: "Location with latitude and longitude is required" });
     }
-    
-    
+
+    // check if the driver exists
+    if (!driver) {
+      return res.status(400).json({ message: "Driver is required" });
+    }
+
+       // Ensure garbageType there
+    if (!Array.isArray(garbageTypes) || garbageTypes.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Garbage type must be a non-empty array of strings" });
+    }
+
+
     const appointment = new Appointment({
       userId,
       date,
@@ -25,6 +49,7 @@ const createAppointment = async (req, res) => {
       },
       status: status || "pending",
       driver,
+      garbageTypes
     });
     
     // id the driver has more than 3 appointments update all to accepted including the new one

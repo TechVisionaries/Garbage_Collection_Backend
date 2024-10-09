@@ -12,6 +12,12 @@ const appointmentSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  garbageTypes: {
+     type: [String], 
+      required: true,
+ },
+  
+
 });
 
 const Appointment = mongoose.model("Appointment", appointmentSchema);
