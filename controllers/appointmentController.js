@@ -200,6 +200,24 @@ const getAllAppointments = async (req, res) => {
   }
 };
 
+// delete appointment by id
+const deleteAppointmentById = async (req, res) => {
+  try {
+    const { id } = req.params;
+   const appointment = await Appointment.findById(id);
+
+    if (!appointment) {
+      return res.status(404).json({ error: "Appointment not found" });
+    }
+
+    await Appointment.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Appointment deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete appointment" });
+  }
+};
+
 
 
 
@@ -213,4 +231,5 @@ export {
   getAllAppointments,
   getMyDriverAppointments,
   acceptAppointment,
+  deleteAppointmentById,
 };
