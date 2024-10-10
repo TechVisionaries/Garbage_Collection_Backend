@@ -6,17 +6,21 @@ import {
   checkDuplicateAppointment,
   getDriverAppointments,
   completeAppointment,
-  getAllAppointments
+  getAllAppointments,
+  getMyDriverAppointments,
+  acceptAppointment
 } from "../controllers/appointmentController.js";
 
 const router = express.Router();
 
 router.post("/", createAppointment);
 router.get("/:userId", getMyAppointments);
-router.put("/:id", cancelAppointment);
+router.put("/cancel/:id", cancelAppointment);
 router.get("/check/:userId/", checkDuplicateAppointment);
 router.get("/driver/:driverId", getDriverAppointments)
 router.put("/complete/:id", completeAppointment)
 router.get("/", getAllAppointments)
+router.get("/driver/my/:driverId", getMyDriverAppointments)
+router.put("/accept/:id", acceptAppointment)
 
 export default router;

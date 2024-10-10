@@ -75,6 +75,20 @@ const getMyAppointments = async (req, res) => {
   }
 };
 
+// get appointments by driver
+const getMyDriverAppointments = async (req, res) => {
+  try {
+    const { driverId } = req.params;
+    const appointments = await Appointment.find({ driver: driverId });
+    res.status(200).json(appointments);
+  } catch (error) {
+    res.status(500).json({ message: "Error getting appointments", error });
+  }
+};
+
+
+
+
 const cancelAppointment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -96,6 +110,32 @@ const cancelAppointment = async (req, res) => {
     res.status(200).json({ message: "Appointment cancelled successfully" });
   } catch (err) {
     res.status(500).json({ error: "Failed to cancel appointment" });
+  }
+};
+
+// accept appointment
+const acceptAppointment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const appointment = await Appointment.findById(id);
+
+    if (!appointment) {
+      return res.status(404).json({ error: "Appointment not found" });
+    }
+
+    if (appointment.status !== "pending") { 
+      return res
+        .status(400)
+        .json({ error: "Only pending appointments can be accepted" });
+    }
+
+    appointment.status = "accepted";
+    await appointment.save();
+
+    res.status(200).json({ message: "Appointment accepted successfully" });
+  }
+  catch (err) {
+    res.status(500).json({ error: "Failed to accept appointment" });
   }
 };
 
@@ -171,4 +211,6 @@ export {
   getDriverAppointments,
   completeAppointment,
   getAllAppointments,
+  getMyDriverAppointments,
+  acceptAppointment,
 };
