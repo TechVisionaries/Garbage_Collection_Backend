@@ -8,7 +8,8 @@ import {
   completeAppointment,
   getAllAppointments,
   getMyDriverAppointments,
-  acceptAppointment
+  acceptAppointment,
+  deleteAppointmentById,
 } from "../controllers/appointmentController.js";
 
 const router = express.Router();
@@ -22,5 +23,7 @@ router.put("/complete/:id", completeAppointment)
 router.get("/", getAllAppointments)
 router.get("/driver/my/:driverId", getMyDriverAppointments)
 router.put("/accept/:id", acceptAppointment)
+router.delete("/:id", deleteAppointmentById)
+
 
 export default router;
