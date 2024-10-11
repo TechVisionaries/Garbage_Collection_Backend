@@ -13,16 +13,16 @@ const checkAppointmentApproval = async (appointment) => {
 
   if (appointmentCount >= 3) {
     // Update all matching appointments to 'accepted'
-    await Appointment.updateMany(
-      {
-        driver,
-        status: "pending",
-        date,
-      },
-      { $set: { status: "accepted" } }
-    );
-       // Update the status of the current appointment object in memory
-       appointment.status = "accepted";
+    // await Appointment.updateMany(
+    //   {
+    //     driver,
+    //     status: "pending",
+    //     date,
+    //   },
+    //   { $set: { status: "accepted" } }
+    // );
+    //    // Update the status of the current appointment object in memory
+    //    appointment.status = "accepted";
   }
 };
 

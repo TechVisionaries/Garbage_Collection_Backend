@@ -27,6 +27,7 @@
     "express": "^4.19.2",
     "express-async-handler": "^1.2.0",
     "express-session": "^1.18.0",
+    "firebase-admin": "^12.6.0",
     "garbage_collection_backend": "file:",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",

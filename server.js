@@ -11,6 +11,7 @@ import userRoutes from './routes/userRoutes.js';
 import rewardRoutes from './routes/rewardRoutes.js';
 import appointmentRoutes from "./routes/appointmentRoutes.js";
 import cityRoutes from "./routes/cityRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/reward', rewardRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/cities", cityRoutes);
+app.use("/api/notify", notificationRoutes);
 
 
 app.use(notFound);

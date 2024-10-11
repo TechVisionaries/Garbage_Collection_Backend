@@ -6,16 +6,40 @@ import mongoose from "mongoose";
 
 const createAppointment = async (req, res) => {
   try {
-    const { userId, date, status, location, driver } = req.body;
+    const { userId, date, status, location, driver,garbageTypes } = req.body;
     console.log(req.body); // Log the incoming request body
 
+    
+    // check if the user exists
+    if (!userId) {
+      return res.status(400).json({ message: "User is required" });
+    }
+    
+    // check if the date exists
+    if (!date) {
+      return res.status(400).json({ message: "Date is required" });
+    }
+    
+    // check if the location there
     if (!location || !location.latitude || !location.longitude) {
       return res
         .status(400)
         .json({ message: "Location with latitude and longitude is required" });
     }
-    
-    
+
+    // check if the driver exists
+    if (!driver) {
+      return res.status(400).json({ message: "Driver is required" });
+    }
+
+       // Ensure garbageType there
+    if (!Array.isArray(garbageTypes) || garbageTypes.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Garbage type must be a non-empty array of strings" });
+    }
+
+
     const appointment = new Appointment({
       userId,
       date,
@@ -25,6 +49,7 @@ const createAppointment = async (req, res) => {
       },
       status: status || "pending",
       driver,
+      garbageTypes
     });
     
     // id the driver has more than 3 appointments update all to accepted including the new one
@@ -50,6 +75,20 @@ const getMyAppointments = async (req, res) => {
   }
 };
 
+// get appointments by driver
+const getMyDriverAppointments = async (req, res) => {
+  try {
+    const { driverId } = req.params;
+    const appointments = await Appointment.find({ driver: driverId });
+    res.status(200).json(appointments);
+  } catch (error) {
+    res.status(500).json({ message: "Error getting appointments", error });
+  }
+};
+
+
+
+
 const cancelAppointment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -74,6 +113,32 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
+// accept appointment
+const acceptAppointment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const appointment = await Appointment.findById(id);
+
+    if (!appointment) {
+      return res.status(404).json({ error: "Appointment not found" });
+    }
+
+    if (appointment.status !== "pending") { 
+      return res
+        .status(400)
+        .json({ error: "Only pending appointments can be accepted" });
+    }
+
+    appointment.status = "accepted";
+    await appointment.save();
+
+    res.status(200).json({ message: "Appointment accepted successfully" });
+  }
+  catch (err) {
+    res.status(500).json({ error: "Failed to accept appointment" });
+  }
+};
+
 // Check if the user has already scheduled an appointment for the selected date if the get the appointment
 const checkDuplicateAppointment = async (req, res) => {
   try {
@@ -95,10 +160,11 @@ const checkDuplicateAppointment = async (req, res) => {
 const getDriverAppointments = async (req, res) => {
   try {
     const { driverId } = req.params;
+    const { date } = req.query;
     const appointments = await Appointment.find({
       driver: driverId,
       status: { $in: ["accepted", "completed"] },
-      date: new Date().toLocaleDateString('en-CA') // Assuming 'date' is stored in 'YYYY-MM-DD' format
+      date: date // Assuming 'date' is stored in 'YYYY-MM-DD' format
     });
     res.status(200).json(appointments);
   } catch (error) {
@@ -122,7 +188,38 @@ const completeAppointment = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Failed to cancel appointment" });
   }
+}
+
+// get all appointments
+const getAllAppointments = async (req, res) => {
+  try {
+    const appointments = await Appointment.find();
+    res.status(200).json(appointments);
+  } catch (error) {
+    res.status(500).json({ message: "Error getting appointments", error });
+  }
 };
+
+// delete appointment by id
+const deleteAppointmentById = async (req, res) => {
+  try {
+    const { id } = req.params;
+   const appointment = await Appointment.findById(id);
+
+    if (!appointment) {
+      return res.status(404).json({ error: "Appointment not found" });
+    }
+
+    await Appointment.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Appointment deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete appointment" });
+  }
+};
+
+
+
 
 export {
   createAppointment,
@@ -131,4 +228,8 @@ export {
   checkDuplicateAppointment,
   getDriverAppointments,
   completeAppointment,
+  getAllAppointments,
+  getMyDriverAppointments,
+  acceptAppointment,
+  deleteAppointmentById,
 };
